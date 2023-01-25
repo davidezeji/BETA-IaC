@@ -1,0 +1,224 @@
+stages:
+  - tf_validate
+  - tf_acct_create_plan
+  - tf_acct_create_apply
+  - tf_parent_vpc_plan
+  - tf_parent_vpc_apply
+  - tf_acct_ram_principal_plan
+  - tf_acct_ram_principal_apply
+  - generate_account_pipelines
+  - account_guardrails
+  ### Cleanup Stages ###
+  - tf_acct_ram_principal_destroy
+  - tf_parent_vpc_destroy
+  - tf_acct_create_destroy
+
+tf_validate:
+  stage: tf_validate
+  when: manual
+  image: alpine:latest
+  script:
+    # Setup Image for Terraform Checks
+    - . terraform_checks.sh
+    # Run Terraform Validate
+    - terraform validate
+    # Run Terraform Format against all .tf files
+    - terraform fmt -recursive
+    # Run Terraform Lint
+    - ./tflint
+
+checkov:
+  stage: tf_validate
+  when: manual
+  allow_failure: true  # True for AutoDevOps compatibility
+  image:
+    name: bridgecrew/checkov:latest
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  rules:
+    - if: $SAST_DISABLED
+      when: never
+    - if: $CI_COMMIT_BRANCH
+      exists:
+        - '**/*.yml'
+        - '**/*.yaml'
+        - '**/*.json'
+        - '**/*.template'
+        - '**/*.tf'      
+        - '**/serverless.yml'
+        - '**/serverless.yaml'
+  script:
+    # Use `script` to emulate `tty` for colored output.
+    - script -q -c 'checkov -d . ; echo $? > CKVEXIT'
+    - exit $(cat CKVEXIT)
+
+tf_acct_create_plan:
+  stage: tf_acct_create_plan
+  when: manual
+  image: alpine:latest
+  script:
+    - cd accountCreation/create-accounts
+    # The acct_create_setup.sh script will:
+    #   Pull in TEMP Vault Credentials
+    #   Install necessary tools on Gitlab runner
+    #   Setup .tfbackend using CICD Variables
+    - . acct_create_setup.sh
+    # Initialize Terraform to use Gitlab State
+    - terraform init -backend-config=config.gitlab.tfbackend
+    - terraform plan -out ../../account.plan
+  artifacts:
+    expire_in: 5 day
+    paths:
+      - account.plan
+
+tf_acct_create_apply:
+  stage: tf_acct_create_apply
+  when: manual
+  image: alpine:latest
+  script:
+    - cd accountCreation/create-accounts
+    - . acct_create_setup.sh
+    # Initialize Terraform to use Gitlab State
+    - terraform init -backend-config=config.gitlab.tfbackend
+    - terraform apply ../../account.plan
+    # Create Terraform Outputs file
+    - terraform output -json > ../../accounts.json
+
+tf_parent_vpc_plan:
+  stage: tf_parent_vpc_plan
+  image: alpine:latest
+  script:
+    - cd accountCreation/vpc
+    # The vpc_create_setup.sh script will:
+    #   Pull in TEMP Vault Credentials
+    #   Install necessary tools on Gitlab runner
+    #   Setup .tfbackend using CICD Variables
+    #   Set variables used in terraform plan/apply
+    - . vpc_create_setup.sh
+    # Initialize Terraform to use Gitlab State
+    - terraform init -backend-config=config.gitlab.tfbackend
+    - terraform plan -out=../../account_vpc.plan 
+  artifacts:
+    expire_in: 5 day
+    paths:
+      - account_vpc.plan
+
+tf_parent_vpc_apply:
+  stage: tf_parent_vpc_apply
+  image: alpine:latest
+  script:
+    - cd accountCreation/vpc
+    - . vpc_create_setup.sh
+    # Initialize Terraform to use Gitlab State
+    # This will apply Shared VPC and Accounts
+    - terraform init -backend-config=config.gitlab.tfbackend
+    # The -var option is not necessary when applying a saved plan file.
+    # A saved plan includes the variable values that were set when it was created.
+    - terraform apply ../../account_vpc.plan
+    # Create Terraform Outputs file
+    - terraform output -json > ../../accounts.json
+    - cd ../..
+    - cat accounts.json
+    # Install Python and Boto3
+    - apk add --no-cache python3 py3-boto3 
+    # Add Terraform outputs to aws_accounts.json (Account Number, RAM Shares)
+    - python3 matchTerraformOuputs.py
+    # List aws_accounts with account_id added
+    - cat aws_accounts.json
+  artifacts:
+    expire_in: 5 day
+    paths:
+      - aws_accounts.json
+
+tf_acct_ram_principal_plan:
+  stage: tf_acct_ram_principal_plan
+  image: alpine:latest
+  script:
+    - cd accountCreation/ram-principal
+    - . acct_ram_principal.sh
+    # Initialize Terraform to use Gitlab State
+    # This will plan RAM Principals for each account
+    - terraform init -backend-config=config.gitlab.tfbackend
+    - terraform plan -out ../../ram-principal.plan
+  artifacts:
+    expire_in: 5 day
+    paths:
+      - ram-principal.plan
+
+tf_acct_ram_principal_apply:
+  stage: tf_acct_ram_principal_apply
+  image: alpine:latest
+  script:
+    - cd accountCreation/ram-principal
+    - . acct_ram_principal.sh
+    # Initialize Terraform to use Gitlab State
+    # This will apply Shared VPC and Accounts
+    - terraform init -backend-config=config.gitlab.tfbackend
+    - terraform apply ../../ram-principal.plan
+
+generate_account_pipelines:
+  stage: generate_account_pipelines
+  image: alpine:latest
+  script:
+    # Check Artifact
+    - cat aws_accounts.json
+    # GCIP to generate ci yaml's
+    # https://dbsystel.gitlab.io/gitlab-ci-python-library/user/index.html
+    # Install jq
+    - apk add -q curl jq python3 py3-pip
+    # Install AWS CLI
+    - apk add --no-cache aws-cli
+    - pip3 install --upgrade boto3
+    - pip3 install gcip
+    - python3 --version
+    - python3 accountConfig.py
+  artifacts:
+    expire_in: 5 day
+    paths:
+      - account_config.yml
+
+account_guardrails:
+  stage: account_guardrails
+  trigger:
+    include:
+      - artifact: account_config.yml
+        job: generate_account_pipelines
+  variables:
+    PARENT_PIPELINE_ID: $CI_PIPELINE_ID
+
+tf_acct_ram_principal_destroy:
+  stage: tf_acct_ram_principal_destroy
+  when: manual
+  image: alpine:latest
+  script:
+    - cd accountCreation/ram-principal
+    - . acct_ram_principal.sh
+    # Initialize Terraform to use Gitlab State
+    # This will apply Shared VPC and Accounts
+    - terraform init -backend-config=config.gitlab.tfbackend
+    - terraform destroy -auto-approve
+
+tf_parent_vpc_destroy:
+  stage: tf_parent_vpc_destroy
+  when: manual
+  image: alpine:latest
+  script:
+    - cd accountCreation/vpc
+    - . vpc_create_setup.sh
+    # Initialize Terraform to use Gitlab State
+    # This will apply Shared VPC and Accounts
+    - terraform init -backend-config=config.gitlab.tfbackend
+    - terraform destroy -auto-approve
+
+tf_acct_create_destroy:
+  stage: tf_acct_create_destroy
+  when: manual
+  image: alpine:latest
+  script:
+    - cd accountCreation/create-accounts
+    - . acct_create_setup.sh
+    # Initialize Terraform to use Gitlab State
+    # This will create Shared VPC and Accounts
+    - terraform init -backend-config=config.gitlab.tfbackend
+    - terraform destroy -auto-approve

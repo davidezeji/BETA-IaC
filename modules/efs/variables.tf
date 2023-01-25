@@ -1,0 +1,202 @@
+variable "namespace" {
+  type        = string
+  default     = ""
+  description = "Namespace, which could be your organization name or abbreviation, e.g. 'eg' or 'cp'"
+}
+
+variable "environment" {
+  type        = string
+  default     = ""
+  description = "Environment, e.g. 'prod', 'staging', 'dev', 'pre-prod', 'UAT'"
+}
+
+variable "stage" {
+  type        = string
+  default     = ""
+  description = "Stage, e.g. 'prod', 'staging', 'dev', OR 'source', 'build', 'test', 'deploy', 'release'"
+}
+
+variable "name" {
+  type        = string
+  default     = ""
+  description = "Solution name, e.g. 'app' or 'jenkins'"
+}
+
+# variable "enabled_efs_sg" {
+#   type        = bool
+#   default     = true
+#   description = "Set to false to prevent the module from creating any resources"
+# }
+variable "enabled" {
+  type        = bool
+  default     = true
+  description = "Set to false to prevent the module from creating any resources"
+}
+
+
+variable "delimiter" {
+  type        = string
+  default     = "-"
+  description = "Delimiter to be used between `namespace`, `environment`, `stage`, `name` and `attributes`"
+}
+
+variable "attributes" {
+  type        = list(string)
+  default     = []
+  description = "Additional attributes (e.g. `1`)"
+}
+
+variable "tags" {
+  type        = map(string)
+  default     = {}
+  description = "Additional tags (e.g. `map('BusinessUnit','XYZ')`"
+}
+
+variable "security_groups" {
+  type        = list(string)
+  description = "Security group IDs to allow access to the EFS"
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "VPC ID"
+}
+
+variable "region" {
+  type        = string
+  description = "AWS Region"
+}
+
+variable "subnets" {
+  type        = list(string)
+  description = "Subnet IDs"
+}
+
+variable "zone_id" {
+  type        = string
+  description = "Route53 DNS zone ID"
+  default     = ""
+}
+
+variable "encrypted" {
+  type        = bool
+  description = "If true, the file system will be encrypted"
+  default     = false
+}
+
+variable "kms_key_id" {
+  type        = string
+  description = "If set, use a specific KMS key"
+  default     = null
+}
+
+variable "performance_mode" {
+  type        = string
+  description = "The file system performance mode. Can be either `generalPurpose` or `maxIO`"
+  default     = "generalPurpose"
+}
+
+variable "provisioned_throughput_in_mibps" {
+  default     = 0
+  description = "The throughput, measured in MiB/s, that you want to provision for the file system. Only applicable with `throughput_mode` set to provisioned"
+}
+
+variable "throughput_mode" {
+  type        = string
+  description = "Throughput mode for the file system. Defaults to bursting. Valid values: `bursting`, `provisioned`. When using `provisioned`, also set `provisioned_throughput_in_mibps`"
+  default     = "bursting"
+}
+
+variable "mount_target_ip_address" {
+  type        = string
+  description = "The address (within the address range of the specified subnet) at which the file system may be mounted via the mount target"
+  default     = ""
+}
+
+variable "dns_name" {
+  type        = string
+  description = "Name of the CNAME record to create"
+  default     = ""
+}
+
+variable "transition_to_ia" {
+  type        = string
+  description = "Indicates how long it takes to transition files to the IA storage class. Valid values: AFTER_7_DAYS, AFTER_14_DAYS, AFTER_30_DAYS, AFTER_60_DAYS and AFTER_90_DAYS"
+  default     = ""
+}
+
+variable "posix_user_gid" {
+  type        = string
+  description = "Efs posix user gid"
+}
+variable "posix_user_uid" {
+  type        = string
+  description = "Efs posix user uid"
+}
+
+variable "root_directory_path" {
+  type        = string
+  description = "Efs root directory path"
+}
+
+variable "root_directory_owner_gid" {
+  type        = string
+  description = "Efs root directory owner gid"
+}
+variable "root_directory_owner_uid" {
+  type        = string
+  description = "Efs root directory owner uid"
+}
+variable "root_directory_permissions" {
+  type        = string
+  description = "Efs root directory permissions"
+}
+
+
+
+
+
+
+# variable "map_additional_iam_users" {
+#   description = "Additional IAM users to add to `config-map-aws-auth` ConfigMap"
+
+#   type = list(object({
+#     userarn  = string
+#     username = string
+#     groups   = list(string)
+#   }))
+
+#   default = []
+# }
+
+variable "cluster_name" {
+  type        = string
+  description = "The name of the EKS cluster"
+}
+variable "cluster_identity_oidc_issuer" {
+  type        = string
+  description = "The OIDC Identity issuer for the cluster."
+}
+
+variable "cluster_identity_oidc_issuer_arn" {
+  type        = string
+  description = "The OIDC Identity issuer ARN for the cluster that can be used to associate IAM roles with a service account."
+}
+
+variable "cluster_namespace" {
+  type        = string
+  default     = "kube-system"
+  description = "Kubernetes namespace to deploy EFS CSI Driver Helm chart."
+}
+
+variable "service_account_name" {
+  type        = string
+  default     = "aws-efs-csi-driver"
+  description = "Amazon EFS CSI Driver service account name."
+}
+
+variable "allowed_cidr_blocks" {
+  type        = list(string)
+  default     = []
+  description = "List of Security Group IDs to be allowed to connect to the EKS cluster"
+}

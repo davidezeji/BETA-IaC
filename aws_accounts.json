@@ -1,0 +1,146 @@
+{
+  "accounts": {
+      "rdc": {
+          "nokia-5g-core": {
+              "account_email": "nickmaize+dish0001@gmail.com",
+              "ou_id": "ou-eha3-n6pki09o",
+              "owner_email": "dish_owner@dish.com",
+              "ticket_number": "abc_0123",
+              "isvname": "nk",
+              "environment": "dev",
+              "us-west-2":{
+                "vpc_cidr": "172.0.0.0/16",
+                "secondary_cidr": "100.65.0.0/16",
+                "ekscluster": false,
+                "clustertype": "std",                
+                "ekscluster_version": 1.23,
+                "eks_node_desired": 0,
+                "eks_node_min": 0,
+                "eks_node_max": 0,
+                "eks_node_type": "t3.small",
+                "eks_node_disksize": 20,
+                "clustername": "01",
+                "s3_bucket": true,
+                "db_module": true
+              }
+          },
+          "mavenir-az": {
+              "account_email": "nickmaize+dish0002@gmail.com",
+              "ou_id": "ou-eha3-n6pki09o",
+              "owner_email": "dish_owner@dish.com",
+              "ticket_number": "abc_123",
+              "isvname": "mv",
+              "environment": "dev",
+              "us-west-2":{
+                "vpc_cidr": "172.0.0.0/16",
+                "secondary_cidr": "100.64.0.0/16",
+                "ekscluster": true,
+                "clustertype": "std",                
+                "ekscluster_version": 1.23,
+                "eks_node_desired": 1,
+                "eks_node_min": 1,
+                "eks_node_max": 2,
+                "eks_node_type": "t3.small",
+                "eks_node_disksize": 20,
+                "clustername": "01",
+                "s3_bucket": true,
+                "db_module": true
+              }
+          },
+          "oracle": {
+              "account_email": "nickmaize+dish0003@gmail.com",
+              "ou_id": "ou-eha3-n6pki09o",
+              "owner_email": "dish_owner@dish.com",
+              "ticket_number": "123_oracle",
+              "isvname": "or",
+              "environment": "dev",
+              "us-west-2":{
+                "vpc_cidr": "172.0.0.0/16",
+                "secondary_cidr": "100.64.0.0/16",
+                "ekscluster": false,
+                "clustertype": "std",                
+                "ekscluster_version": 1.23,
+                "eks_node_desired": 1,
+                "eks_node_min": 1,
+                "eks_node_max": 2,
+                "eks_node_type": "t3.small",
+                "eks_node_disksize": 20,
+                "clustername": "01",
+                "s3_bucket": true,
+                "db_module": true
+              }
+          },
+          "nokia-rdc": {
+              "account_email": "nickmaize+dish0004@gmail.com",
+              "ou_id": "ou-eha3-n6pki09o",
+              "owner_email": "dish_owner@dish.com",
+              "ticket_number": "0123_abc",
+              "isvname": "nk",
+              "environment": "dev",
+              "us-west-2":{
+                "vpc_cidr": "172.0.0.0/16",
+                "secondary_cidr": "100.64.0.0/16",
+                "ekscluster": false,
+                "clustertype": "std",                
+                "ekscluster_version": 1.23,
+                "eks_node_desired": 0,
+                "eks_node_min": 0,
+                "eks_node_max": 0,
+                "eks_node_type": "t3.small",
+                "eks_node_disksize": 20,
+                "clustername": "01",
+                "s3_bucket": true,
+                "db_module": true
+              }
+          }
+      },
+      "bedc": {    
+          "nokia-b-edc": {
+              "account_email": "nickmaize+dish0005@gmail.com",
+              "ou_id": "ou-eha3-n6pki09o",
+              "owner_email": "dish_owner@dish.com",
+              "ticket_number": "123_abc",
+              "isvname": "nk",
+              "environment": "dev",
+              "us-west-2":{
+                "vpc_cidr": "172.1.0.0/16",
+                "secondary_cidr": "100.65.0.0/16",
+                "ekscluster": false,
+                "clustertype": "std",                
+                "ekscluster_version": 1.23,
+                "eks_node_desired": 0,
+                "eks_node_min": 0,
+                "eks_node_max": 0,
+                "eks_node_type": "t3.small",
+                "eks_node_disksize": 20,
+                "clustername": "01",
+                "s3_bucket": true,
+                "db_module": true
+              }
+          },
+          "mavenir-b-edc": {
+              "account_email": "nickmaize+dish0006@gmail.com",
+              "ou_id": "ou-eha3-n6pki09o",
+              "owner_email": "dish_owner@dish.com",
+              "ticket_number": "867-5309",
+              "isvname": "mv",
+              "environment": "dev",
+              "us-west-2":{
+                "vpc_cidr": "172.1.0.0/16",
+                "secondary_cidr": "100.65.0.0/16",
+                "ekscluster": false,
+                "clustertype": "std",                
+                "ekscluster_version": 1.23,
+                "eks_node_desired": 0,
+                "eks_node_min": 0,
+                "eks_node_max": 0,
+                "eks_node_type": "t3.small",
+                "eks_node_disksize": 20,
+                "clustername": "01",
+                "s3_bucket": true,
+                "db_module": true
+              }
+          }
+      }
+  }
+}

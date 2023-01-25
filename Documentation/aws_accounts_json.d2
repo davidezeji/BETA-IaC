@@ -1,0 +1,99 @@
+direction: right
+## aws_accounts.json breakdown ##
+accounts
+accounts -- account_type -- account
+account -- account_email
+account_email: {|md
+    account_email is used to create a new AWS Account.
+    It must be unique and not in use by any other AWS Account.
+|}
+account -- ou_id
+ou_id: {|md
+    ou_id is used to place the new AWS Account into the proper OU.
+    The OU is responsible for which Service Control Policies will be applied
+    to the new AWS Account.
+|}
+account -- owner_email
+owner_email: {|md
+    owner_email is currently only used as a tagging resource
+|}
+account -- ticket_number
+ticket_number: {|md
+    ticket_number is currently only used as a tagging resource
+|}
+account -- isvname
+isvname: {|md
+    isvname is a DISH naming convention ID that is added to resource names
+|}
+account -- environment
+environment: {|md
+    environment defines what type of workload is running on the resources.
+|}
+account -- region
+region: {|md
+    region is used to define where AWS resources are needed. It needs to be 
+    populated with the necessary key, value pairs.
+    |
+}
+# region.shape: sequence_diagram
+region -- vpc_cidr
+vpc_cidr: {|md
+    vpc_cidr is currently a manual CIDR definition but will be used to create VPCs inside of the parent account.
+    vpc_cidr should match for all child accounts that need to be within the same VPCs. (bedc, ndc, etc)
+|}
+region -- ekscluster
+ekscluster: {|md
+    ekscluster is a bool value that will create EKS Clusters if 'true'. 
+    If false, no EKS resources are deployed.
+|}
+region -- clustertype
+clustertype: {|md
+    clustertype is currently not in use but future planning would be to define certain parameters for EKS clusters.
+|}
+region -- ekscluster_version
+ekscluster_version: {|md
+    ekscluster_version is used to define which version of EKS to deploy
+|}
+region -- eks_node_desired
+eks_node_desired: {|md
+    eks_node_desired is used for the AWS Autoscaling group desired nodes.
+|}
+region -- eks_node_min
+eks_node_min: {|md
+    eks_node_min is used for the AWS Autoscaling group minimum nodes.
+|}
+region -- eks_node_max
+eks_node_max: {|md
+    eks_node_max is used for the AWS Autoscaling group maximum nodes.
+|}
+region -- eks_node_type
+eks_node_type: {|md
+    eks_node_type is used for the Autoscaling group Instance Type (t3.medium, c5.xlarge, etc)
+|}
+region -- eks_node_disksize
+eks_node_disksize: {|md
+    eks_node_disksize is used to define how much diskspace is assigned to each node
+|}
+region -- clustername
+clustername: {|md
+    clustername is currently just used as a label on the EKS cluster name.
+|}
+region -- s3_bucket
+s3_bucket: {|md
+    s3_bucket is currently just a place holder for future improvements
+|}
+region -- db_module
+db_module: {|md
+    db_module is currently just a place holder for future improvements
+|}
+
+## Notes about what this file is used for ##
+Notes: |md
+    This file is passed through each stage of the pipeline as an artifact.
+    After the accounts are created, account_id is added into the file.
+    After the VPCs are created all VPCs, Subnets, Tags, and other Terraform
+    Outputs are added as well. This information is used in later stages
+    to pull in the proper IDs for each ISV. VPCs are created in the parent account
+    and shared to each child account using AWS Resource Access Manager.
+|
+Notes.shape: page

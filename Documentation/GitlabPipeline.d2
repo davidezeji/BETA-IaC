@@ -1,0 +1,443 @@
+direction: right
+Gitlab: "" {
+  shape: image
+  icon: https://www.svgrepo.com/show/373625/gitlab.svg
+  width: 200
+  height: 200
+}
+
+############
+# Process Definitions
+############
+BashScripting: |md
+Each stage will run bash script to aquire Vault credentials and properly setup the
+Gitlab runner. The script will set temporary Programmatic Access Keys as Environment
+Variables that will be referenced by Terraform. The script will also customize the
+Gitlab Backend using envsubst to create unique Terraform States.
+|
+BashScripting.shape: page
+BashScripting.near: tf_acct_create_plan
+
+Vault: |md
+  Vault will authenticate using Gitlab JWT (JSON Web Token) to aquire temporary
+  AWS Programatic Access Credentials. The token is then used by the Gitlab Runner
+  to plan/apply Terraform resources.
+|
+Vault.shape: page
+Vault.near: tf_acct_create_plan
+
+Terraform: |md
+  Terraform will authenticate using Gitlab JWT (JSON Web Token) to aquire temporary
+  AWS Programatic Access Credentials. The token is then used by the Gitlab Runner
+  to plan/apply Terraform resources.
+|
+Terraform.shape: page
+Terraform.near: tf_acct_create_plan
+
+############
+# Validation Stage
+############
+tf_validate: "IAC Validation" {
+  tf_validate: "tf_validate"
+  tf_validate.TF_Format: "Terraform Formatting, Linting, and IAC Checking" {
+    shape: square
+    |md
+      terraform fmt --recursive
+      The terraform fmt command is used to rewrite Terraform configuration files to a canonical format 
+      and style. This command applies a subset of the Terraform language style conventions, along with 
+      other minor adjustments for readability. This will not fail the pipeline but will return which 
+      files need to be formatted properly in the repository
+
+      TFLint is a framework and each feature is provided by plugins, the key features are as follows:
+      Find possible errors (like invalid instance types) for Major Cloud providers (AWS/Azure/GCP).
+      Warn about deprecated syntax, unused declarations.
+      Enforce best practices, naming conventions.
+
+      Checkov scans cloud infrastructure configurations to find misconfigurations before they're 
+      deployed. If a scan returns errors it will still allow the pipeline to complete. Once in 
+      production this should fail the pipeline and force the code to be resolved before implementing.
+    |
+  }
+  shape: step
+}
+
+############
+# Account Creation Plan/Apply (Parent Account)
+############
+tf_acct_create_plan: "Terraform Acct Create Plan" {
+  tf_acct_create_plan: "tf_acct_create_plan"
+  tf_acct_create_plan.Folder: "Folder: accountCreation/create-accounts"
+  tf_acct_create_plan.BashScripting: "Bash Script (acct_create_setup.sh)"
+  tf_acct_create_plan.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  tf_acct_create_plan.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+tf_acct_create_apply: "Terraform Acct Create Apply" {
+  tf_acct_create_apply: "tf_acct_create_apply"
+  tf_acct_create_apply.Folder: "Folder: accountCreation/create-accounts"
+  tf_acct_create_apply.BashScripting: "Bash Script (acct_create_setup.sh)"
+  tf_acct_create_apply.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  tf_acct_create_apply.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+############
+# Account VPC Plan/Apply (Parent Account)
+############
+tf_parent_vpc_plan: "Terraform VPC Create Plan" {
+  tf_parent_vpc_plan: "tf_parent_vpc_plan"
+  tf_parent_vpc_plan.Folder: "Folder: accountCreation/vpc"
+  tf_parent_vpc_plan.BashScripting: "Bash Script (vpc_create_setup.sh)"
+  tf_parent_vpc_plan.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  tf_parent_vpc_plan.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+tf_parent_vpc_apply: "Terraform VPC Create Apply" {
+  tf_parent_vpc_apply: "tf_parent_vpc_apply"
+  tf_parent_vpc_apply.Folder: "Folder: accountCreation/vpc"
+  tf_parent_vpc_apply.BashScripting: "Bash Script (vpc_create_setup.sh)"
+  tf_parent_vpc_apply.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  tf_parent_vpc_apply.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+############
+# Account RAM Principals to share resources to children accounts (Parent Account)
+############
+tf_acct_ram_principal_plan: "Terraform RAM Principal Plan" {
+  tf_acct_ram_principal_plan: "tf_acct_ram_principal_plan"
+  tf_acct_ram_principal_plan.Folder: "Folder: accountCreation/ram-principal"
+  tf_acct_ram_principal_plan.BashScripting: "Bash Script (acct_ram_principal.sh)"
+  tf_acct_ram_principal_plan.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  tf_acct_ram_principal_plan.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+tf_acct_ram_principal_apply: "Terraform RAM Principal Apply" {
+  tf_acct_ram_principal_apply: "tf_acct_ram_principal_apply"
+  tf_acct_ram_principal_apply.Folder: "Folder: accountCreation/ram-principal"
+  tf_acct_ram_principal_apply.BashScripting: "Bash Script (acct_ram_principal.sh)"
+  tf_acct_ram_principal_apply.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  tf_acct_ram_principal_apply.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+############
+# Generate Account Pipelines uses Python to create
+# stages for each account within aws_accounts.json
+############
+generate_account_pipelines: "Generate Child Account Guardrails" {
+  generate_account_pipelines: "generate_account_pipelines"
+  generate_account_pipelines.Script: "accountConfig.py"{|md
+    The script will generate a dynamic account_config.yml file.
+    The file is passed to the next stage which is a 'Trigger' 
+    for the child pipelines.
+  |}
+  generate_account_pipelines.python: "Python" {
+    icon: https://www.svgrepo.com/show/166811/py.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+############
+# Trigger for Child Pipelines
+############
+account_guardrails: "Trigger for Child Pipelines"{
+  account_guardrails: "account_guardrails"
+  account_guardrails.Trigger: ""{|md
+    This stage triggers the child pipeline using the python
+    artifact from the previous stage 'generate_account_pipelines'.
+    The account_config.yml artifact will include all accounts in
+    listed aws_accounts.json and run guardrails against each
+    account. The stages would essentially lockdown the account to
+    match DISH standards for every AWS Account.
+    Logging, Monitoring, IAM, SSO, etc.
+  |}
+  shape: step  
+}
+
+############
+# ISV Guardrails Plan/Apply (Each ISV Account)
+############
+ISV_Plan: "Terraform ISV Guardrails Plan" {
+  ISV_Plan: "ISV_Plan"
+  ISV_Plan.Folder: "Folder: accountConfiguration"
+  ISV_Plan.BashScripting: "Bash Script (acct_config_setup.sh)"
+  ISV_Plan: "This stage will run against all ISV Child accounts."
+  ISV_Plan.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  ISV_Plan.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+ISV_Apply: "Terraform ISV Guardrails Apply" {
+  ISV_Apply: "ISV_Apply"
+  ISV_Apply.Folder: "Folder: accountConfiguration"
+  ISV_Apply.BashScripting: "Bash Script (acct_config_setup.sh)"
+  ISV_Apply: "This stage will run against all ISV Child accounts."
+  ISV_Apply.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  ISV_Apply.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+############
+# Manual Destroy Stages
+############
+tf_acct_ram_principal_destroy: "Terraform RAM Principal Destroy" {
+  tf_acct_ram_principal_destroy.Folder: "Folder: accountCreation/ram-principal"
+  tf_acct_ram_principal_destroy.BashScripting: "Bash Script (acct_ram_principal.sh)"
+  tf_acct_ram_principal_destroy.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  tf_acct_ram_principal_destroy.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+tf_parent_vpc_destroy: "Terraform VPC Destroy" {
+  tf_parent_vpc_destroy.Folder: "Folder: accountCreation/vpc"
+  tf_parent_vpc_destroy.BashScripting: "Bash Script (vpc_create_setup.sh)"
+  tf_parent_vpc_destroy.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  tf_parent_vpc_destroy.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+tf_acct_create_destroy: "Terraform Acct Destroy" {
+  tf_acct_create_destroy.Folder: "Folder: accountCreation/create-accounts"
+  tf_acct_create_destroy.BashScripting: "Bash Script (acct_create_setup.sh)"
+  tf_acct_create_destroy.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  tf_acct_create_destroy.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+############
+# Generate Child ISV Pipelines uses Python to create
+# stages for each account within aws_accounts.json
+# that has EKS: true
+############
+vendorConfig_CI: "Generate Child Pipeline for ISV specific Resources" {
+  vendorConfig_CI: "vendorConfig_CI"
+  vendorConfig_CI.Script: "accountVendorConfig.py"{|md
+    The script will generate a dynamic account_vendor_config.yml file.
+    The file is passed to the account_vendor_pipeline_trigger stage 
+    which is a 'Trigger' for the ISV specific child pipeline resources.
+  |}
+  vendorConfig_CI.python: "Python" {
+    icon: https://www.svgrepo.com/show/166811/py.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+} 
+
+############
+# Trigger for ISV Specific Child Pipelines
+############
+account_vendor_pipeline_trigger: "Trigger for Child Pipelines"{
+  account_vendor_pipeline_trigger.Trigger: "account_vendor_pipeline_trigger"{|md
+    This stage triggers the ISV Specific child pipeline using the
+    python artifact from the previous stage 'vendorConfig_CI'.
+    The account_vendor_pipeline_trigger.yml artifact will include 
+    only accounts listed aws_accounts.json with EKS: 'true' and 
+    run the EKS Terraform Module. The stages creates desired EKS
+    resources based on the configuration in aws_accounts.json
+  |}
+  shape: step  
+}
+
+############
+# ISV EKS Plan/Apply (Each ISV Account with EKS: true)
+############
+ISV_EKS_Plan: "Terraform ISV EKS Plan" {
+  ISV_EKS_Plan: "ISV_EKS_Plan"
+  ISV_EKS_Plan.Folder: "Folder: accountVendorConfiguration/ekscluster"
+  ISV_EKS_Plan.BashScripting: "Bash Script (accountVendorConfiguration/vendor_config_setup.sh)"
+  ISV_EKS_Plan: "This stage will only run against ISV accounts with EKS: true."
+  ISV_EKS_Plan.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  ISV_EKS_Plan.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+ISV_EKS_Apply: "Terraform ISV EKS Apply" {
+  ISV_EKS_Apply: "ISV_EKS_Apply"
+  ISV_EKS_Apply.Folder: "Folder: accountVendorConfiguration/ekscluster"
+  ISV_EKS_Apply.BashScripting: "Bash Script (accountVendorConfiguration/vendor_config_setup.sh)"
+  ISV_EKS_Apply: "This stage will only run against ISV accounts with EKS: true."
+  ISV_EKS_Apply.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  ISV_EKS_Apply.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+ISV_EKS_Destroy: "Terraform EKS Destroy" {
+  ISV_EKS_Destroy.Folder: "Folder: accountVendorConfiguration/ekscluster"
+  ISV_EKS_Destroy.BashScripting: "Bash Script (accountVendorConfiguration/vendor_config_setup.sh)"
+  ISV_EKS_Destroy.Vault: "Vault" {
+    icon: https://cdn.worldvectorlogo.com/logos/vault-enterprise.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  ISV_EKS_Destroy.Terraform: "Terraform" {
+    icon: https://www.svgrepo.com/show/354447/terraform-icon.svg
+    shape: image
+    width: 100
+    height: 100
+  }
+  shape: step
+}
+
+############
+# Compile the flow 
+############
+Gitlab -> tf_validate
+tf_validate -> tf_acct_create_plan
+tf_acct_create_plan -> tf_acct_create_apply
+tf_acct_create_apply -> tf_parent_vpc_plan
+tf_parent_vpc_plan -> tf_parent_vpc_apply
+tf_parent_vpc_apply -> tf_acct_ram_principal_plan
+tf_acct_ram_principal_plan -> tf_acct_ram_principal_apply
+tf_acct_ram_principal_apply -> generate_account_pipelines
+generate_account_pipelines -> account_guardrails
+account_guardrails -> vendorConfig_CI: Child Pipeline creation
+account_guardrails -> ISV_Plan: Guardrail Stages
+ISV_Plan -> ISV_Apply
+vendorConfig_CI -> account_vendor_pipeline_trigger: Trigger ISV Customization
+account_vendor_pipeline_trigger -> ISV_EKS_Plan
+ISV_EKS_Plan -> ISV_EKS_Apply
+ISV_EKS_Plan -> ISV_EKS_Destroy: Manual Stage
+### Cleanup Stages ###
+tf_acct_ram_principal_apply -> tf_acct_ram_principal_destroy: Manual Stages
+tf_parent_vpc_apply -> tf_parent_vpc_destroy: Manual Stages
+tf_acct_create_apply -> tf_acct_create_destroy: Manual Stages

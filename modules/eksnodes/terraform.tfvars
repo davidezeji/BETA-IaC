@@ -1,0 +1,11 @@
+cluster_name        = "eksbeta1"
+desired_size        = 1
+instance_type       = "t3.medium"
+instance_types      = ["t3.medium"]
+max_size            = 5
+min_size            = 1
+name                = "betanodes"
+subnet_ids          = ["subnet-b61ce0ce", "subnet-02f54411f4a8d5126"]
+key_name            = "terraform"
+image_id            = "ami-0db7c77c593eb15a2"
+multus_nodes_subnet = "subnet-02f54411f4a8d5126"
