@@ -131,7 +131,7 @@ for account in create_eks_cluster:
     plan_job(account, eks_folder, account_vendor_pipeline, account_vendor_config_folder, account_vendor_config_script)
     apply_job(account, eks_folder, account_vendor_pipeline, account_vendor_config_folder, account_vendor_config_script)
     destroy_job(account, eks_folder, account_vendor_pipeline, account_vendor_config_folder, account_vendor_config_script)
-    destroy_job_fail(account, eks_folder, account_vendor_pipeline, account_vendor_config_folder, account_vendor_config_script)
+    # destroy_job_fail(account, eks_folder, account_vendor_pipeline, account_vendor_config_folder, account_vendor_config_script)
     
 # Write the pipeline variable to YAML
 account_vendor_pipeline.write_yaml("account_vendor_config.yml")
